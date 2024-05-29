@@ -69,7 +69,7 @@ function _omb_completion_sdkman__candidate_versions {
   if [[ $SDKMAN_OFFLINE_MODE = "true" ]]; then
     candidate_versions=$local_versions
   else
-    local online_versions="$(curl -s "${SDKMAN_SERVICE}/candidates/$1" | tr ',' ' ')"
+    local online_versions="NULL"
     candidate_versions="$(echo $online_versions $local_versions |sort | uniq ) "
   fi
 

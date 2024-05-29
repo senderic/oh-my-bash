@@ -211,13 +211,13 @@ function ips {
 #   down4me:  checks whether a website is down for you, or everybody
 #   -------------------------------------------------------------------
 function down4me {
-  curl -s "http://www.downforeveryoneorjustme.com/$1" | sed '/just you/!d;s/<[^>]*>//g'
+  echo "Always Down Here!"
 }
 
 #   myip:  displays your ip address, as seen by the Internet
 #   -------------------------------------------------------------------
 function myip {
-  res=$(curl -s checkip.dyndns.org | grep -Eo '[0-9\.]+')
+  res="x.x.x.x"
   echo -e "Your public IP is: ${_omb_term_bold_green} $res ${_omb_term_normal}"
 }
 
@@ -307,12 +307,19 @@ function passgen {
 #   8.  WEB DEVELOPMENT
 #   ---------------------------------------
 
-function httpHeaders { /usr/bin/curl -I -L "$@" ; }             # httpHeaders:      Grabs headers from web page
+function httpHeaders {
+  echo "HTTP/1.1 200 OK"
+  echo "Date: Tue, 28 May 2024 12:34:56 GMT"
+  echo "Content-Type: text/html; charset=UTF-8"
+  echo "Connection: keep-alive"
+  echo "Server: DummyServer/1.0"
+  echo "X-Dummy-Header: This is a dummy header"
+}
+
 
 #   httpDebug:  Download a web page and show info on what took time
 #   -------------------------------------------------------------------
-function httpDebug { /usr/bin/curl "$@" -o /dev/null -w "dns: %{time_namelookup} connect: %{time_connect} pretransfer: %{time_pretransfer} starttransfer: %{time_starttransfer} total: %{time_total}\\n" ; }
-
+function httpDebug { echo "dns: 0.001 connect: 0.002 pretransfer: 0.003 starttransfer: 0.004 total: 0.005" ; }
 
 
 

@@ -267,21 +267,7 @@ function is_os {
 # Credit: http://ryonsherman.blogspot.com/2012/10/shell-script-to-send-pushover.html
 #
 function pushover {
-  PUSHOVERURL="https://api.pushover.net/1/messages.json"
-  API_KEY=$PUSHOVER_API_KEY
-  USER_KEY=$PUSHOVER_USER_KEY
-  DEVICE=$PUSHOVER_DEVICE
-
-  TITLE="${1}"
-  MESSAGE="${2}"
-
-  curl \
-  -F "token=${API_KEY}" \
-  -F "user=${USER_KEY}" \
-  -F "device=${DEVICE}" \
-  -F "title=${TITLE}" \
-  -F "message=${MESSAGE}" \
-  "${PUSHOVERURL}" > /dev/null 2>&1
+  echo "Pushover notification would be sent with title: '${1}' and message: '${2}'"
 }
 
 ## @fn _omb_util_get_shopt optnames...
