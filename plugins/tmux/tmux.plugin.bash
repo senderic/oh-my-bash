@@ -46,3 +46,12 @@ function _omb_plugin_tmux_directory_session {
 }
 
 alias tds='_omb_plugin_tmux_directory_session'
+
+# Autocomplete for tmux aliases (ta, tad, tkss)
+function _omb_tmux_alias_sessions() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  local sessions=$(tmux list-sessions -F "#S" 2>/dev/null)
+  COMPREPLY=( $(compgen -W "${sessions}" -- "${cur}") )
+}
+
+complete -F _omb_tmux_alias_sessions ta tad tkss
