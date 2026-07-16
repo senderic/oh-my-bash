@@ -26,11 +26,11 @@ _terraform()
 complete -F _terraform terraform
 
 function _omb_terraform_alias_complete() {
-  local cur=${COMP_WORDS[COMP_CWORD]}
-  local prev=""
-  if ((COMP_CWORD > 0)); then
-    prev=${COMP_WORDS[COMP_CWORD - 1]}
+  if ((COMP_CWORD == 0)); then
+    return 1
   fi
+
+  local cur=${COMP_WORDS[COMP_CWORD]}
   local cmd=${COMP_WORDS[0]}
 
   local expansion
@@ -136,7 +136,7 @@ function _omb_terraform_alias_complete() {
       real_func="${real_func%\"}"
     fi
 
-    if [[ $real_func ]]; then
+    if [[ $real_func ]] && _omb_util_function_exists "$real_func"; then
       local -a COMP_WORDS_saved=("${COMP_WORDS[@]}")
       local COMP_CWORD_saved=$COMP_CWORD
       local COMP_LINE_saved="$COMP_LINE"
