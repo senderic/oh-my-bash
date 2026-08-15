@@ -1,4 +1,4 @@
-claude_at() {
+tmux_resume() {
     local session_name="$1"
     # Accept variable time arguments (everything after the first arg)
     local run_time="${*:2}"
@@ -6,7 +6,7 @@ claude_at() {
 
     # Help menu check
     if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-        echo "Usage: claude_at <tmux_session> <time>"
+        echo "Usage: tmux_resume <tmux_session> <time>"
         echo ""
         echo "Schedules a non-interactive resume command into a running tmux session at a specific time using 'at'."
         echo ""
@@ -15,16 +15,16 @@ claude_at() {
         echo "  <time>          Execution time. May contain multiple words for 'at' (e.g., '5:01 PM' or 'now + 2 minutes')"
         echo ""
         echo "Examples:"
-        echo "  claude_at my_tmux_session_name 12:01"
-        echo "  claude_at my_tmux_session_name 5:01 PM"
-        echo "  claude_at my_tmux_session_name now + 2 minutes"
+        echo "  tmux_resume my_tmux_session_name 12:01"
+        echo "  tmux_resume my_tmux_session_name 5:01 PM"
+        echo "  tmux_resume my_tmux_session_name now + 2 minutes"
         return 0
     fi
 
     # Validation check for missing arguments
     if [[ -z "$session_name" || -z "$run_time" ]]; then
         echo "Error: Missing arguments."
-        echo "Try 'claude_at --help' for more information."
+        echo "Try 'tmux_resume --help' for more information."
         return 1
     fi
 
@@ -39,7 +39,7 @@ claude_at() {
     # Keep the $(date -Iseconds) literal so it's evaluated when the job runs.
     at_script=$(cat <<AT_SCRIPT
 /usr/bin/tmux send-keys -t ${session_name} "resume" Enter
-logger -t claude_at "Executed at job: input_time='${run_time}' effective_time='\$(date -Iseconds)' session='${session_name}'"
+logger -t tmux_resume "Executed at job: input_time='${run_time}' effective_time='\$(date -Iseconds)' session='${session_name}'"
 /bin/echo "[at job] Claude session resumed in tmux." > ${current_tty}
 AT_SCRIPT
 )
@@ -50,7 +50,7 @@ AT_SCRIPT
 
     if [[ $at_exit_code -ne 0 ]]; then
         echo "Failed to schedule at job: $job_info"
-        logger -t claude_at "Failed to schedule at job: input_time='${run_time}' session='${session_name}' error='${job_info//$'\n'/ }'"
+        logger -t tmux_resume "Failed to schedule at job: input_time='${run_time}' session='${session_name}' error='${job_info//$'\n'/ }'"
         return $at_exit_code
     fi
 
@@ -58,10 +58,10 @@ AT_SCRIPT
     # Include the raw output from at for traceability.
     # Normalize newlines in job_info for a single-line log entry.
     job_info_single_line=$(printf "%s" "$job_info" | tr '\n' ' ')
-    logger -t claude_at "Scheduled at job: input_time='${run_time}' effective_time='${effective_time_create}' session='${session_name}' at_output='${job_info_single_line}'"
+    logger -t tmux_resume "Scheduled at job: input_time='${run_time}' effective_time='${effective_time_create}' session='${session_name}' at_output='${job_info_single_line}'"
 
     # Also echo a user-facing confirmation to the current tty.
-    echo "Scheduled claude resume for session '${session_name}' at '${run_time}'."
+    echo "Scheduled tmux resume for session '${session_name}' at '${run_time}'."
 
     return 0
 }
@@ -76,38 +76,38 @@ _omb_plugin_tmux_directory_session_name() {
     elif _omb_util_command_exists md5; then
         md5=$(printf '%s' "$PWD" | md5)
     else
-        echo "[oh-my-bash] claude_at_tds: md5sum or md5 not found, tds requires one of them" >&2
+        echo "[oh-my-bash] tmux_resume_tds: md5sum or md5 not found, tds requires one of them" >&2
         return 1
     fi
     echo "${dir}-${md5:0:6}"
 }
 
-claude_at_tds() {
+tmux_resume_tds() {
     # Accept variable time arguments (everything after the first arg)
     local run_time="${*:1}"
     local session_name
 
     # Help menu check
     if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-        echo "Usage: claude_at_tds <time>"
+        echo "Usage: tmux_resume_tds <time>"
         echo ""
-        echo "Schedules a non-interactive claude resume for the current directory's tmux session at a specific time."
+        echo "Schedules a non-interactive tmux resume for the current directory's tmux session at a specific time."
         echo "Automatically detects the tmux session name from the current working directory (using oh-my-bash tds convention)."
         echo ""
         echo "Arguments:"
         echo "  <time>  Execution time. May contain multiple words for 'at' (e.g., '5:01 PM' or 'now + 2 minutes')"
         echo ""
         echo "Examples:"
-        echo "  claude_at_tds 12:01"
-        echo "  claude_at_tds 5:01 PM"
-        echo "  claude_at_tds now + 2 minutes"
+        echo "  tmux_resume_tds 12:01"
+        echo "  tmux_resume_tds 5:01 PM"
+        echo "  tmux_resume_tds now + 2 minutes"
         return 0
     fi
 
     # Validation check for missing arguments
     if [[ -z "$run_time" ]]; then
         echo "Error: Missing time argument."
-        echo "Try 'claude_at_tds --help' for more information."
+        echo "Try 'tmux_resume_tds --help' for more information."
         return 1
     fi
 
@@ -125,6 +125,6 @@ claude_at_tds() {
         return 1
     fi
 
-    # Call claude_at with the detected session and provided time
-    claude_at "$session_name" $run_time
+    # Call tmux_resume with the detected session and provided time
+    tmux_resume "$session_name" $run_time
 }
