@@ -128,3 +128,22 @@ tmux_resume_tds() {
     # Call tmux_resume with the detected session and provided time
     tmux_resume "$session_name" $run_time
 }
+
+# Autocomplete first argument (tmux session name), matching the `ta` alias completion.
+function _omb_complete_tmux_resume() {
+  [[ ${COMP_CWORD} -eq 1 ]] || return 0
+  local cur=${COMP_WORDS[COMP_CWORD]}
+
+  local -a sessions
+  _omb_util_split_lines sessions "$(tmux list-sessions -F '#S' 2>/dev/null)"
+
+  COMPREPLY=()
+  local s escaped
+  for s in "${sessions[@]}"; do
+    [[ $s == "$cur"* ]] || continue
+    printf -v escaped '%q' "$s"  # escapes spaces/glob metachars
+    COMPREPLY+=("$escaped")
+  done
+}
+
+complete -F _omb_complete_tmux_resume tmux_resume
