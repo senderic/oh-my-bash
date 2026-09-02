@@ -60,9 +60,16 @@ function _omb_util_alias_select_nano {
   # also supports "-W" for a different meaning than Nano, which leads to a
   # problem [2].  We exclude Pico by checking if it matches "-W <wordseps>".
   #
+  # In addition, we have used "nano --help" to get the help text, but it turned
+  # out that Pico starts the text editor in the terminal with "nano --help" in
+  # macOS, which blocks the execution of the following command.  This cannot be
+  # prevented by redirecting the standard streams.  Instead, we need to use
+  # "nano -h", which is supported by both Nano and Pico as an option to print
+  # the help text, to safely check the support for the option.
+  #
   # [1] https://github.com/ohmybash/oh-my-bash/issues/419
   # [2] https://github.com/ohmybash/oh-my-bash/issues/776
-  if LANG=C command nano --help 2>/dev/null | grep '^[[:space:]]*-W' | grep -qv '^[[:space:]]*-W <wordseps>'; then
+  if LANG=C command nano -h 2>/dev/null | grep '^[[:space:]]*-W' | grep -qv '^[[:space:]]*-W <wordseps>'; then
     _omb_command='nano -W'
   else
     _omb_command='nano'
