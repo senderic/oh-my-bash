@@ -54,7 +54,15 @@ _omb_util_alias_delayed mkdir force
 
 # Preferred 'nano' implementation
 function _omb_util_alias_select_nano {
-  if LANG=C command nano --help 2>/dev/null | grep -q '^[[:space:]]*[-]W'; then
+  # We check if the present "nano" implementation supports -W.  It seems macOS
+  # "nano" is actually Pico by default [1].  However, it turned out that
+  # checking "-W" in the help output is not sufficient to exclude Pico.  Pico
+  # also supports "-W" for a different meaning than Nano, which leads to a
+  # problem [2].  We exclude Pico by checking if it matches "-W <wordseps>".
+  #
+  # [1] https://github.com/ohmybash/oh-my-bash/issues/419
+  # [2] https://github.com/ohmybash/oh-my-bash/issues/776
+  if LANG=C command nano --help 2>/dev/null | grep '^[[:space:]]*-W' | grep -qv '^[[:space:]]*-W <wordseps>'; then
     _omb_command='nano -W'
   else
     _omb_command='nano'
