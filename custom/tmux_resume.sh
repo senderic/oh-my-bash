@@ -38,7 +38,7 @@ tmux_resume() {
     # Build the script that will be run by 'at'.
     # Keep the $(date -Iseconds) literal so it's evaluated when the job runs.
     at_script=$(cat <<AT_SCRIPT
-/usr/bin/tmux send-keys -t ${session_name} "resume" Enter
+/usr/bin/tmux send-keys -t ${session_name} "resume and revive any dead agents during your idle time" Enter
 logger -t tmux_resume "Executed at job: input_time='${run_time}' effective_time='\$(date -Iseconds)' session='${session_name}'"
 /bin/echo "[at job] Claude session resumed in tmux." > ${current_tty}
 AT_SCRIPT
