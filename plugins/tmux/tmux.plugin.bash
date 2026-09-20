@@ -58,14 +58,16 @@ function _omb_plugin_tmux_directory_session {
 
 alias tds='_omb_plugin_tmux_directory_session'
 
-# Alias for tds with suffix support (kept for backward compatibility / discoverability).
+# Discoverable alias for creating suffixed directory sessions.
 alias tdss='_omb_plugin_tmux_directory_session'
 
 # Autocomplete for tmux aliases (ta, tad, tkss)
-# Compares escaped session names against the escaped current word to handle
-# sessions containing spaces or shell metacharacters.
-function _omb_tmux_alias_sessions() {
+# Compare shell-escaped session names against both forms Bash can provide for
+# the current word: raw text and text containing command-line escapes.
+function _omb_plugin_tmux_alias_sessions {
   local cur=${COMP_WORDS[COMP_CWORD]}
+  local escaped_cur
+  printf -v escaped_cur '%q' "$cur"
 
   local -a sessions
   _omb_util_split_lines sessions "$(tmux list-sessions -F '#S' 2>/dev/null)"
@@ -73,10 +75,10 @@ function _omb_tmux_alias_sessions() {
   COMPREPLY=()
   local s escaped
   for s in "${sessions[@]}"; do
-    printf -v escaped '%q' "$s"  # escapes spaces/glob metachars
-    [[ $escaped == "$cur"* ]] || continue
+    printf -v escaped '%q' "$s"
+    [[ $escaped == "$cur"* || $escaped == "$escaped_cur"* ]] || continue
     COMPREPLY+=("$escaped")
   done
 }
 
-complete -F _omb_tmux_alias_sessions ta tad tkss
+complete -F _omb_plugin_tmux_alias_sessions ta tad tkss
