@@ -29,47 +29,41 @@ alias ts='tmux new-session -s'
 alias to='tmux new-session -A -s'
 alias tmuxconf='${EDITOR:-vim} ~/.tmux.conf'
 
-# Create or attach to a tmux session named after the current directory with an optional suffix.
-function _omb_plugin_tmux_directory_session {
-  local dir=${PWD##*/}
+# Generate a short hash for the current directory path.
+# Uses md5sum (Linux) or md5 -q (macOS/BSD) to get a consistent 6-char prefix.
+function _omb_plugin_tmux_dir_hash {
   local md5
   if _omb_util_command_exists md5sum; then
     md5=$(printf '%s' "$PWD" | md5sum | cut -d ' ' -f 1)
   elif _omb_util_command_exists md5; then
-    md5=$(printf '%s' "$PWD" | md5)
+    # macOS/BSD md5 requires -q for quiet/raw output
+    md5=$(printf '%s' "$PWD" | md5 -q)
   else
-    _omb_util_print '[oh-my-bash] tmux plugin: md5sum or md5 not found, tds requires one of them' >&2
+    _omb_util_print '[oh-my-bash] tmux plugin: md5sum or md5 not found, tds/tdss require one of them' >&2
     return 1
   fi
+  printf '%s' "${md5:0:6}"
+}
+
+# Create or attach to a tmux session named after the current directory with an optional suffix.
+function _omb_plugin_tmux_directory_session {
+  local dir=${PWD##*/}
+  local hash
+  hash=$(_omb_plugin_tmux_dir_hash) || return 1
   local suffix="${1:-}"
-  local session_name="${dir}-${md5:0:6}"
+  local session_name="${dir}-${hash}"
   [[ -n "$suffix" ]] && session_name="${session_name}-${suffix}"
   tmux new-session -As "$session_name"
 }
 
 alias tds='_omb_plugin_tmux_directory_session'
 
-# Create or attach to a tmux session named after the current directory with an optional suffix.
-function _omb_plugin_tmux_directory_session_suffix {
-  local dir=${PWD##*/}
-  local md5
-  if _omb_util_command_exists md5sum; then
-    md5=$(printf '%s' "$PWD" | md5sum | cut -d ' ' -f 1)
-  elif _omb_util_command_exists md5; then
-    md5=$(printf '%s' "$PWD" | md5)
-  else
-    _omb_util_print '[oh-my-bash] tmux plugin: md5sum or md5 not found, tdss requires one of them' >&2
-    return 1
-  fi
-  local suffix="${1:-}"
-  local session_name="${dir}-${md5:0:6}"
-  [[ -n "$suffix" ]] && session_name="${session_name}-${suffix}"
-  tmux new-session -As "$session_name"
-}
-
-alias tdss='_omb_plugin_tmux_directory_session_suffix'
+# Alias for tds with suffix support (kept for backward compatibility / discoverability).
+alias tdss='_omb_plugin_tmux_directory_session'
 
 # Autocomplete for tmux aliases (ta, tad, tkss)
+# Compares escaped session names against the escaped current word to handle
+# sessions containing spaces or shell metacharacters.
 function _omb_tmux_alias_sessions() {
   local cur=${COMP_WORDS[COMP_CWORD]}
 
@@ -79,8 +73,8 @@ function _omb_tmux_alias_sessions() {
   COMPREPLY=()
   local s escaped
   for s in "${sessions[@]}"; do
-    [[ $s == "$cur"* ]] || continue
     printf -v escaped '%q' "$s"  # escapes spaces/glob metachars
+    [[ $escaped == "$cur"* ]] || continue
     COMPREPLY+=("$escaped")
   done
 }
